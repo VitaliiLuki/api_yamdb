@@ -1,7 +1,7 @@
 # YaMDb project
 ## Description
 
-YaMDb project collects user's reviews for work titles. YaMDb doesn't keep a works, users can't watch a films or listen to a songs, they can just write a review or leave a comment to review.
+YaMDb API project collects user's reviews for work titles. YaMDb doesn't keep a works, users can't watch a films or listen to a songs, they can just write a review or leave a comment to review.
 
 Adding a work titles, categories or genres is allowed only for administrators.
 
