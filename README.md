@@ -1,20 +1,21 @@
 # Проект YaMDb
 ## Описание проекта 
 
-Проект YaMDb собирает отзывы пользователей на произведения. Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.
+YaMDb project collects user's reviews for work titles. YaMDb doesn't keep a works, users can't watch a films or listen to a songs, they can just write a review or leave a comment to review.
 
+Adding a work titles, categories or genres is allowed only for administrators.
 Добавлять произведения, категории и жанры может только администратор.
 
-Благодарные или возмущённые пользователи оставляют к произведениям текстовые отзывы и ставят произведению оценку в диапазоне от одного до десяти (целое число); из пользовательских оценок формируется усреднённая оценка произведения — рейтинг (целое число). 
+Grateful or unpleased users leave text reviews for the works and rate the work in the range from one to ten (an integer); The average grade is forming by using users ratings.
 
-На одно произведение пользователь может оставить только один отзыв.
-Добавлять отзывы, комментарии и ставить оценки могут только аутентифицированные пользователи.
+A user can leave only one review per work.
+Adding a reviews, comments and grades is allowed only to authenticated users.
 ## Как запустить проект:
 
-Клонировать репозиторий и перейти в него в командной строке:
+Clone repository and go to directory "api_yamdb"
 
-```bash
-  git clone https://github.com/UchihaIP/api_yamdb.git 
+```
+  git clone https://github.com/VitaliiLuki/api_yamdb.git 
   cd api_yamdb
 ```
 Cоздать и активировать виртуальное окружение:

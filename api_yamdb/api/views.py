@@ -32,6 +32,7 @@ class CreateListDestroyViewSet(
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """To create, edit, delete, etc. the title data."""
     queryset = (Title.objects.all()
                 .select_related('category')
                 .prefetch_related('genre')
@@ -46,6 +47,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
+    """Create, show, delete category data."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = PageNumberPagination
@@ -56,6 +58,7 @@ class CategoryViewSet(CreateListDestroyViewSet):
 
 
 class GenreViewSet(CreateListDestroyViewSet):
+    """Create, show, delete genre data."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     pagination_class = PageNumberPagination
@@ -67,6 +70,7 @@ class GenreViewSet(CreateListDestroyViewSet):
 
 @api_view(["POST"])
 def RegistryView(request):
+    """Registrate a new user and send a confirmation code to email."""
     try:
         user = User.objects.get(username=request.data.get('username'),
                                 email=request.data.get('email'))
@@ -75,16 +79,19 @@ def RegistryView(request):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         confirmation_code = default_token_generator.make_token(user)
+        user.confirmation_code = confirmation_code
+        user.save()
         _send_email(serializer.validated_data.get("email"), confirmation_code)
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
-    confirmation_code = default_token_generator.make_token(user)
+    confirmation_code = user.confirmation_code
     _send_email(request.data['email'], confirmation_code)
-    return Response("Код подтверждения отправлен!", status=status.HTTP_200_OK)
+    return Response("Confirmation code has sent!", status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
 def JWTTokenView(request):
+    """Sending a token for a verified username and verification code."""
     serializer = JWTTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data.get('username')
@@ -98,6 +105,7 @@ def JWTTokenView(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """Gives access create, get and change users data."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
@@ -130,6 +138,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Create, show, delete reviews data."""
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModeratorAuthor,)
 
@@ -143,6 +152,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Create, show, delete comments data."""
     serializer_class = CommentSerialiser
 
     permission_classes = (IsAdminModeratorAuthor,)
@@ -158,7 +168,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 def _send_email(email, confirmation_code):
     send_mail(
-        subject="Ваш код для доступа",
+        subject="Your code for access",
         message=confirmation_code,
         from_email=settings.CONTACT_EMAIL,
         recipient_list=[email]

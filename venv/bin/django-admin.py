@@ -1,4 +1,4 @@
-#!/Users/vitalii/DEV/api_yamdb/venv/bin/python3.7
+#!/Users/vitalii/DEV/api_yamdb/venv/bin/python3
 from django.core import management
 
 if __name__ == "__main__":

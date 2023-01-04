@@ -6,6 +6,7 @@ from users.models import User
 
 
 class Command(BaseCommand):
+    """Loading data to reviews models."""
     help = 'Load csv files to reviews models.'
 
     def handle(self, *args, **kwargs):
@@ -82,4 +83,4 @@ class Command(BaseCommand):
                     pub_date=row['pub_date'],
                 )
 
-        return 'Распаковка csv для моделей reviews прошла успешно!'
+        return 'Unpacking of csv file for reviews models was successful!'

@@ -3,23 +3,24 @@ info:
   title: 'YaMDb API'
   version: ''
   description: |
-    запросы к API начинаются с `/api/v1/`
+    requests to API start with `/api/v1/`
 
-    # Описание
-    Проект **YaMDb** собирает отзывы пользователей на различные произведения.
+    # Description
+    **YaMDb** project collects user reviews for various works.
 
-    # Алгоритм регистрации пользователей
-    1. Пользователь отправляет POST-запрос на добавление нового пользователя с параметрами `email` и `username` на эндпоинт `/api/v1/auth/signup/`.
-    2. **YaMDB** отправляет письмо с кодом подтверждения (`confirmation_code`) на адрес  `email`.
-    3. Пользователь отправляет POST-запрос с параметрами `username` и `confirmation_code` на эндпоинт `/api/v1/auth/token/`, в ответе на запрос ему приходит `token` (JWT-токен).
-    4. При желании пользователь отправляет PATCH-запрос на эндпоинт `/api/v1/users/me/` и заполняет поля в своём профайле (описание полей — в документации).
+    # Algorithm for new users registration.
+    1. User send POST-request for adding a new user with following arguments: `email` and `username` to endpoint `/api/v1/auth/signup/`.
+    2. **YaMDB** send mail with confirmation code to email adress(this option works with 'django.core.mail.backends.filebased.EmailBackend')
+      and send mails to 'sent_mails' directory.
+    3. User send POST-request with arguments `username` and `confirmation_code` to endpoint  `/api/v1/auth/token/`, and recieve as a response `token` (JWT-token).
+    4. If desired user can send PATCH-request to `/api/v1/users/me/` and fill in all fields in his own profile (fields description - look below).
 
-    # Пользовательские роли
-    - **Аноним** — может просматривать описания произведений, читать отзывы и комментарии.
-    - **Аутентифицированный пользователь** (`user`) — может, как и **Аноним**, читать всё, дополнительно он может публиковать отзывы и ставить оценку произведениям (фильмам/книгам/песенкам), может комментировать чужие отзывы; может редактировать и удалять **свои** отзывы и комментарии. Эта роль присваивается по умолчанию каждому новому пользователю.
-    - **Модератор** (`moderator`) — те же права, что и у **Аутентифицированного пользователя** плюс право удалять **любые** отзывы и комментарии.
-    - **Администратор** (`admin`) — полные права на управление всем контентом проекта. Может создавать и удалять произведения, категории и жанры. Может назначать роли пользователям. 
-    - **Суперюзер Django** — обладет правами администратора (`admin`)
+    # User's roles.
+    - **Anonymous** — can overview works description, read reviews and comments.
+    - **Authenticated user** (`user`) -  can do the same as anonymous but in addition to can publicate reviews, evaluate works, comment other reviews, edit or delete own reviews/comments. This role is assigned by default.
+    - **Moderator** (`moderator`) — has the same rights as user but in addition to has a right to delete any reviews and comments.
+    - **Administrator** (`admin`) — has a full rights to rule over all content, can create/delete work titles, genres, categories. Can assign user's roles.
+    - **Superuser Django** — has the same rights as administrator.
 
 
 servers:
@@ -27,34 +28,34 @@ servers:
 
 tags:
   - name: AUTH
-    description: Регистрация пользователей и выдача токенов
+    description: User registration and token receiving.
   - name: CATEGORIES
-    description: Категории (типы) произведений
+    description: Categories (types) of works.
   - name: GENRES
-    description: Категории жанров
+    description: Genres.
   - name: TITLES
-    description: Произведения, к которым пишут отзывы (определённый фильм, книга или песенка).
+    description: Works to which users write reviews (certain film, book or song).
   - name: REVIEWS
-    description: Отзывы
+    description: Reviews.
   - name: COMMENTS
-    description: Комментарии к отзывам
+    description: Comments to reviews.
   - name: USERS
-    description: Пользователи
+    description: Users.
 
 paths:
   /auth/signup/:
     post:
       tags:
         - AUTH
-      operationId: Регистрация нового пользователя
+      operationId: New user registratuon.
       description: |
-        Получить код подтверждения на переданный `email`.
+        To receive a confirmation code to the given 'email'.
 
-        Права доступа: **Доступно без токена.**
+        Access rights: **Available without token.**
 
-        Использовать имя 'me' в качестве `username` запрещено.
+        Using 'me' name as `username` is prohibited.
 
-        Поля `email` и `username` должны быть уникальными.
+        `email` and `username` fields must be unique.
       parameters: []
       requestBody:
         content:
@@ -81,22 +82,22 @@ paths:
                 required:
                 - email
                 - username
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'A required field is missing or incorrect'
   /auth/token/:
     post:
       tags:
         - AUTH
-      operationId: Получение JWT-токена
+      operationId: Receiving JWT-token
       description: |
-        Получение JWT-токена в обмен на username и confirmation code.
+        To receive JWT-token you need to submit username и confirmation code.
 
-        Права доступа: **Доступно без токена.**
+        Access rights: **Available without token.**
       requestBody:
         content:
           application/json:
@@ -116,34 +117,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Token'
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         400:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'A required field is missing or incorrect'
         404:
-          description: Пользователь не найден
+          description: User with email and username wasn't found.
 
   /categories/:
     get:
       tags:
         - CATEGORIES
-      operationId: Получение списка всех категорий
+      operationId: Receiving categories list.
       description: |
-        Получить список всех категорий
+        To receive a list of all categories
 
-        Права доступа: **Доступно без токена**
+        Access rights: **Available without token.**
       parameters:
       - name: search
         in: query
-        description: Поиск по названию категории
+        description: Search by category name
         schema:
           type: string
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: Successful execution of the request
           content:
             application/json:
               schema:
@@ -164,13 +165,13 @@ paths:
     post:
       tags:
         - CATEGORIES
-      operationId: Добавление новой категории
+      operationId: Adding a new category
       description: |
-        Создать категорию.
+        To create a category.
 
-        Права доступа: **Администратор.**
+        Access rights: **Administrator.**
 
-        Поле `slug` каждой категории должно быть уникальным.
+        `slug` field must be unique to each category.
       requestBody:
         content:
           application/json:
@@ -178,21 +179,21 @@ paths:
               $ref: '#/components/schemas/Category'
       responses:
         201:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Category'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'A required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
       security:
       - jwt-token:
         - write:admin
@@ -200,27 +201,27 @@ paths:
     delete:
       tags:
         - CATEGORIES
-      operationId: Удаление категории
+      operationId: Deleting a category
       description: |
-        Удалить категорию.
+        To delete a category.
 
-        Права доступа: **Администратор.**
+        Access rights: **Administrator.**
       parameters:
       - name: slug
         in: path
         required: true
-        description: Slug категории
+        description: Slug of category
         schema:
           type: string
       responses:
         204:
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         401:
-          description: Необходим JWT-токен
+          description: JWT-токен required
         403:
-          description: Нет прав доступа
+          description: No rights for access
         404:
-          description: Категория не найдена
+          description: The category wasn't found
       security:
       - jwt-token:
         - write:admin
@@ -229,20 +230,20 @@ paths:
     get:
       tags:
         - GENRES
-      operationId: Получение списка всех жанров
+      operationId: Receiving a list with all genres
       description: |
-        Получить список всех жанров.
+        To receive a list with all genres
 
-        Права доступа: **Доступно без токена**
+        Access rights: **Available without token.**
       parameters:
       - name: search
         in: query
-        description: Поиск по названию жанра
+        description: Search by genre name
         schema:
           type: string
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
@@ -263,30 +264,30 @@ paths:
     post:
       tags:
         - GENRES
-      operationId: Добавление жанра
+      operationId: Adding a genre
       description: |
-        Добавить жанр.
+        To add a genre.
 
-        Права доступа: **Администратор**.
+        Access rights: **Administrator**.
 
-        Поле `slug` каждого жанра должно быть уникальным.
+        `slug` field for each genre must be uniqie.
       responses:
         201:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Genre'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'A required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
       security:
       - jwt-token:
         - write:admin
@@ -295,27 +296,27 @@ paths:
     delete:
       tags:
         - GENRES
-      operationId: Удаление жанра
+      operationId: Deleting of genre
       description: |
-        Удалить жанр.
+        To delete genre.
 
-        Права доступа: **Администратор**.
+        Access rights: **Administrator**.
       parameters:
       - name: slug
         in: path
         required: true
-        description: Slug жанра
+        description: Slug of genre
         schema:
           type: string
       responses:
         204:
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Жанр не найден
+          description: Genre wasn't found
       security:
       - jwt-token:
         - write:admin
@@ -324,35 +325,35 @@ paths:
     get:
       tags:
         - TITLES
-      operationId: Получение списка всех произведений
+      operationId: Receiving a list with all work titles
       description: |
-        Получить список всех объектов.
+        To receive a list with all work titles
 
-        Права доступа: **Доступно без токена**
+        Access rights: **Available without token.**
       parameters:
         - name: category
           in: query
-          description: фильтрует по полю slug категории
+          description: filters by category slug field
           schema:
             type: string
         - name: genre
           in: query
-          description: фильтрует по полю slug жанра
+          description: filters by genre slug field
           schema:
             type: string
         - name: name
           in: query
-          description: фильтрует по названию произведения
+          description: filters by title of work
           schema:
             type: string
         - name: year
           in: query
-          description: фильтрует по году
+          description: filters by yearду
           schema:
             type: integer
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
@@ -373,15 +374,15 @@ paths:
     post:
       tags:
         - TITLES
-      operationId: Добавление произведения
+      operationId: Adding of work title
       description: |
-        Добавить новое произведение.
+        To add a new work title.
 
-        Права доступа: **Администратор**.
+        Access rights: **Administrator**.
 
-        Нельзя добавлять произведения, которые еще не вышли (год выпуска не может быть больше текущего).
+        Adding a work titles which haven't released yet is prohibited (Year of release should be less then current).
 
-        При добавлении нового произведения требуется указать уже существующие категорию и жанр.
+        When adding a new work title, you must specify an existing category and genre.
       parameters: []
       requestBody:
         content:
@@ -390,21 +391,21 @@ paths:
               $ref: '#/components/schemas/TitleCreate'
       responses:
         201:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Title'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
       security:
       - jwt-token:
         - write:admin
@@ -413,36 +414,36 @@ paths:
       - name: titles_id
         in: path
         required: true
-        description: ID объекта
+        description: Object ID
         schema:
           type: integer
     get:
       tags:
         - TITLES
-      operationId: Получение информации о произведении
+      operationId: Getting information about a work
       description: |
-        Информация о произведении
+        Information about a work
 
 
-        Права доступа: **Доступно без токена**
+        Access rights: **Available without token**
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Title'
         404:
-          description: Объект не найден
+          description: Object wasn't found
     patch:
       tags:
         - TITLES
-      operationId: Частичное обновление информации о произведении
+      operationId: Partial information update about a work
       description: |
-        Обновить информацию о произведении
+        To update information about a work
 
 
-        Права доступа: **Администратор**
+        Access rights: **Administrator**
       requestBody:
         content:
           application/json:
@@ -450,37 +451,37 @@ paths:
               $ref: '#/components/schemas/TitleCreate'
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Title'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Объект не найден
+          description: Object wasn't found
       security:
       - jwt-token:
         - write:admin
     delete:
       tags:
         - TITLES
-      operationId: Удаление произведения
+      operationId: Deleating of work title
       description: |
-        Удалить произведение.
+        To delete a work title
 
-        Права доступа: **Администратор**.
+        Access rights: **Administrator**
       responses:
         204:
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Произведение не найдено
+          description: Work title wasn't found
       security:
       - jwt-token:
         - write:admin
@@ -490,20 +491,20 @@ paths:
       - name: title_id
         in: path
         required: true
-        description: ID произведения
+        description: Work title ID
         schema:
           type: integer
     get:
       tags:
         - REVIEWS
-      operationId: Получение списка всех отзывов
+      operationId: Receiving a reviews list
       description: |
-        Получить список всех отзывов.
+        To receive a reviews list.
 
-        Права доступа: **Доступно без токена**.
+        Access rights: **Available without token**.
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
@@ -522,15 +523,15 @@ paths:
                       items:
                         $ref: '#/components/schemas/Review'
         404:
-          description: Произведение не найдено
+          description: Work title wasn't found
     post:
       tags:
         - REVIEWS
-      operationId: Добавление нового отзыва
+      operationId: Adding a new review
       description: |
-        Добавить новый отзыв. Пользователь может оставить только один отзыв на произведение.
+        To add a new review. User can write just one review.
 
-        Права доступа: **Аутентифицированные пользователи.**
+        Access rights: **Authenticated users.**
       requestBody:
         content:
           application/json:
@@ -538,21 +539,21 @@ paths:
               $ref: '#/components/schemas/Review'
       responses:
         201:
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Review'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         404:
-          description: Произведение не найдено
+          description: Work title wasn't found
       security:
       - jwt-token:
         - write:user,moderator,admin
@@ -561,40 +562,40 @@ paths:
       - name: title_id
         in: path
         required: true
-        description: ID произведения
+        description: Work title ID
         schema:
           type: integer
       - name: review_id
         in: path
         required: true
-        description: ID отзыва
+        description: Review ID
         schema:
           type: integer
     get:
       tags:
         - REVIEWS
-      operationId: Полуение отзыва по id
+      operationId: Getting review by id
       description: |
-        Получить отзыв по id для указанного произведения.
+        To get a review by id for certaing work title.
 
-        Права доступа: **Доступно без токена.**
+        Access rights: **Avalilable without token.**
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Review'
         404:
-          description: Произведение или отзыв не найден
+          description: Work title or review wasn't found.
     patch:
       tags:
         - REVIEWS
-      operationId: Частичное обновление отзыва по id
+      operationId: Partial review update by id
       description: |
-        Частично обновить отзыв по id.
+        Partially update review by id.
 
-        Права доступа: **Автор отзыва, модератор или администратор.**
+        Access rights: **Author of review, moderator or administrator.**
       requestBody:
         content:
           application/json:
@@ -602,43 +603,43 @@ paths:
               $ref: '#/components/schemas/Review'
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Review'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Произведение не найдено
+          description: Work title wasn't found
       security:
       - jwt-token:
         - write:user,moderator,admin
     delete:
       tags:
         - REVIEWS
-      operationId: Удаление отзыва по id
+      operationId: Deleting a review by id
       description: |
-        Удалить отзыв по id
+        To delete review by id
 
-        Права доступа: **Автор отзыва, модератор или администратор.**
+        Access rights: **Author of review, moderator or administrator.**
       responses:
         204:
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Произведение или отзыв не найдены
+          description: Work title or review weren't found
       security:
       - jwt-token:
         - write:user,moderator,admin
@@ -648,26 +649,26 @@ paths:
       - name: title_id
         in: path
         required: true
-        description: ID произведения
+        description: Work title ID
         schema:
           type: integer
       - name: review_id
         in: path
         required: true
-        description: ID отзыва
+        description: Review ID
         schema:
           type: integer
     get:
       tags:
         - COMMENTS
-      operationId: Получение списка всех комментариев к отзыву
+      operationId: Getting a commentary list to the certain review.
       description: |
-        Получить список всех комментариев к отзыву по id
+        To get a commentary list to the certain review by id.
 
-        Права доступа: **Доступно без токена.**
+        Access rights: **Available without token.**
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
@@ -686,15 +687,15 @@ paths:
                       items:
                         $ref: '#/components/schemas/Comment'
         404:
-          description: Не найдено произведение или отзыв
+          description: Work title or review weren't found
     post:
       tags:
         - COMMENTS
-      operationId: Добавление комментария к отзыву
+      operationId: Adding a comment to certain review
       description: |
-        Добавить новый комментарий для отзыва.
+        To add a new comment to certain review
 
-        Права доступа: **Аутентифицированные пользователи.**
+        Access rights: **Authenticated users.**
       requestBody:
         content:
           application/json:
@@ -706,17 +707,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         404:
-          description: Не найдено произведение или отзыв
+          description: Work title or review weren't found
       security:
       - jwt-token:
         - write:user,moderator,admin
@@ -726,46 +727,46 @@ paths:
       - name: title_id
         in: path
         required: true
-        description: ID произведения
+        description: Work title ID
         schema:
           type: integer
       - name: review_id
         in: path
         required: true
-        description: ID отзыва
+        description: Review ID
         schema:
           type: integer
       - name: comment_id
         in: path
         required: true
-        description: ID комментария
+        description: Comment ID
         schema:
           type: integer
     get:
       tags:
         - COMMENTS
-      operationId: Получение комментария к отзыву
+      operationId: Getting a comment to certain review
       description: |
-        Получить комментарий для отзыва по id.
+        To get a comment to certain review
 
-        Права доступа: **Доступно без токена.**
+        Access rights: **Avalilable without token.**
       responses:
         200:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         404:
-          description: Не найдено произведение, отзыв или комментарий
+          description: Work title, review or comment wasn't found
     patch:
       tags:
         - COMMENTS
-      operationId: Частичное обновление комментария к отзыву
+      operationId: Partially comment update to certain review
       description: |
-        Частично обновить комментарий к отзыву по id.
+        Partially update a comment to the certain review by id.
 
-        Права доступа: **Автор комментария, модератор или администратор**.
+        Access rights: **Author of comment, moderator or administrator**.
       requestBody:
         content:
           application/json:
@@ -777,39 +778,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Не найдено произведение, отзыв или комментарий
+          description: Work title, review or comment wasn't found
       security:
       - jwt-token:
         - write:user,moderator,admin
     delete:
       tags:
         - COMMENTS
-      operationId: Удаление комментария к отзыву
+      operationId: Deleting a comment to the certain review
       description: |
-        Удалить комментарий к отзыву по id.
+        TO delete a comment to the certain review by id.
 
-        Права доступа: **Автор комментария, модератор или администратор**.
+        Access rights: **Author of comment, moderator or administrator**.
       responses:
         204:
-          description: 'Удачное выполнение запроса'
+          description: 'Successful execution of the request'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Не найдено произведение, отзыв или комментарий
+          description: Work title, review or comment wasn't found
       security:
       - jwt-token:
         - write:user,moderator,admin
@@ -818,20 +819,20 @@ paths:
     get:
       tags:
         - USERS
-      operationId: Получение списка всех пользователей
+      operationId: Getting a list of all users
       description: |
-        Получить список всех пользователей.
+        To get a list of all users.
 
-        Права доступа: **Администратор**
+        Access rights: **Administrator**.
       parameters:
       - name: search
         in: query
-        description: Поиск по имени пользователя (username)
+        description: Search by username
         schema:
           type: string
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
@@ -850,20 +851,20 @@ paths:
                       items:
                         $ref: '#/components/schemas/User'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
       security:
       - jwt-token:
         - read:admin
     post:
       tags:
         - USERS
-      operationId: Добавление пользователя
+      operationId: Adding a new user
       description: |
-        Добавить нового пользователя.
+        To add a new user.
 
-        Права доступа: **Администратор**
+        Access rights: **Administrator**.
 
-        Поля `email` и `username` должны быть уникальными.
+        `email` and `username` fields must be unique.
       requestBody:
         content:
           application/json:
@@ -871,21 +872,21 @@ paths:
               $ref: '#/components/schemas/User'
       responses:
         201:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
       security:
       - jwt-token:
         - write:admin
@@ -894,43 +895,43 @@ paths:
       - name: username
         in: path
         required: true
-        description: Username пользователя
+        description: Username
         schema:
           type: string
     get:
       tags:
         - USERS
-      operationId: Получение пользователя по username
+      operationId: Getting a user by username
       description: |
-        Получить пользователя по username.
+        To get a user by username
 
-        Права доступа: **Администратор**
+        Access rights: **Administrator**.
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Пользователь не найден
+          description: User wasn't found
       security:
       - jwt-token:
         - read:admin
     patch:
       tags:
         - USERS
-      operationId: Изменение данных пользователя по username
+      operationId: Changing user data by username
       description: |
-        Изменить данные пользователя по username.
+        To change user data by username
 
-        Права доступа: **Администратор.**
+        Access rights: **Administrator**.
 
-        Поля `email` и `username` должны быть уникальными.
+        `email` и `username` fields must be unique
       requestBody:
         content:
           application/json:
@@ -938,43 +939,43 @@ paths:
               $ref: '#/components/schemas/User'
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Пользователь не найден
+          description: User wasn't found
       security:
       - jwt-token:
         - write:admin
     delete:
       tags:
         - USERS
-      operationId: Удаление пользователя по username
+      operationId: Deleting a user by username
       description: |
-        Удалить пользователя по username.
+        TO delete a user by username
 
-        Права доступа: **Администратор.**
+        Access rights: **Administrator**.
       responses:
         204:
-          description: Удачное выполнение запроса
+          description: 'Successful execution of the request'
         401:
-          description: Необходим JWT-токен
+          description: JWT-token required
         403:
-          description: Нет прав доступа
+          description: No access rights
         404:
-          description: Пользователь не найден
+          description: User wasn't found
       security:
       - jwt-token:
         - write:admin
@@ -983,14 +984,14 @@ paths:
     get:
       tags:
         - USERS
-      operationId: Получение данных своей учетной записи
+      operationId: Getting your account information
       description: |
-        Получить данные своей учетной записи
+        TO get your account information
 
-        Права доступа: **Любой авторизованный пользователь**
+        Access rights: **Authenticated user**
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: Successful execution of the request
           content:
             application/json:
               schema:
@@ -1001,13 +1002,13 @@ paths:
     patch:
       tags:
         - USERS
-      operationId: Изменение данных своей учетной записи
+      operationId: Changing own account information
       description: |
-        Изменить данные своей учетной записи
+        To change own account information
 
-        Права доступа: **Любой авторизованный пользователь**
+        Access rights: **Authenticated user**
 
-        Поля `email` и `username` должны быть уникальными.
+        `email` and `username` must be unique.
       requestBody:
         content:
           application/json:
@@ -1015,13 +1016,13 @@ paths:
               $ref: '#/components/schemas/Me'
       responses:
         200:
-          description: Удачное выполнение запроса
+          description: Successful execution of the request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         400:
-          description: 'Отсутствует обязательное поле или оно некорректно'
+          description: 'The required field is missing or incorrect'
           content:
             application/json:
               schema:
@@ -1034,9 +1035,9 @@ components:
   schemas:
 
     User:
-      title: Пользователь
+      title: User
       type: object
-      description: Детальная информация о пользователе
+      description: Detail information about user
       required:
           - username
           - email
@@ -1061,35 +1062,35 @@ components:
           type: string
         role:
           type: string
-          description: Администратор, модератор или пользователь. По умолчанию `user`.
+          description: Administrator, moderator or user. By default `user`.
           enum:
             - user
             - moderator
             - admin
 
     Title:
-      title: Объект
+      title: Object
       type: object
       required:
         - name
       properties:
         id:
           type: integer
-          title: ID произведения
+          title: Work title ID
           readOnly: true
         name:
           type: string
-          title: Название
+          title: name
         year:
           type: integer
-          title: Год выпуска
+          title: Year of release
         rating:
           type: integer
           readOnly: True
-          title: Рейтинг на основе отзывов, если отзывов нет — `None`
+          title: Rating based on reviews if there are no reviews - set 'None'
         description:
           type: string
-          title: Описание
+          title: description
         genre:
           type: array
           items:
@@ -1098,7 +1099,7 @@ components:
           $ref: '#/components/schemas/Category'
 
     TitleCreate:
-      title: Объект для изменения
+      title: Object to change
       type: object
       required:
         - name
@@ -1108,21 +1109,21 @@ components:
       properties:
         name:
           type: string
-          title: Название
+          title: name
         year:
           type: integer
-          title: Год выпуска
+          title: Year of release
         description:
           type: string
-          title: Описание
+          title: description
         genre:
           type: array
           items:
             type: string
-            title: Slug жанра
+            title: Slug of genre
         category:
           type: string
-          title: Slug категории
+          title: Slug of category
 
     Genre:
       type: object
@@ -1139,37 +1140,37 @@ components:
       - slug
 
     Review:
-      title: Отзыв
+      title: Review
       type: object
-      description: Детальная информация отзыва
+      description: Detail information about a review
       required:
           - text
           - score
       properties:
         id:
           type: integer
-          title: ID  отзыва
+          title: Review ID
           readOnly: true
         text:
           type: string
-          title: Текст отзыва
+          title: Text of review
         author:
           type: string
-          title: username пользователя
+          title: User's username
           readOnly: true
         score:
           type: integer
-          title: Оценка
+          title: Grade
           minimum: 1
           maximum: 10
         pub_date:
           type: string
           format: date-time
-          title: Дата публикации отзыва
+          title: Pablication date of a review
           readOnly: true
 
     ValidationError:
-      title: Ошибка валидации
+      title: Validation error
       type: object
       properties:
         field_name:
@@ -1178,35 +1179,35 @@ components:
             type: string
 
     Token:
-      title: Токен
+      title: Token
       type: object
       properties:
         token:
           type: string
-          title: access токен
+          title: access roken
 
     Comment:
-      title: Комментарий
+      title: Comment
       type: object
-      description: Детальная информация комментария
+      description: Comment's detail information
       required:
         - text
       properties:
         id:
           type: integer
-          title: ID  комментария
+          title: Comment ID
           readOnly: true
         text:
           type: string
-          title: Текст комментария
+          title: Text of comment
         author:
           type: string
-          title: username автора комментария
+          title: author's username of comment
           readOnly: true
         pub_date:
           type: string
           format: date-time
-          title: Дата публикации комментария
+          title: Date the comment was posted
           readOnly: true
 
     Me:
@@ -1258,6 +1259,6 @@ components:
   securitySchemes:
     jwt-token:
       type: apiKey
-      description: Используется аутентификация с использованием JWT-токенов
+      description: Authentication using JWT tokens
       name: Bearer
       in: header

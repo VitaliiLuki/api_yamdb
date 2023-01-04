@@ -3,7 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    """Класс пользователя"""
+    """Create and saves a user with unique email and username."""
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
@@ -17,35 +17,35 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=100,
         unique=True,
-        verbose_name='Уникальное имя пользователя'
+        verbose_name='Unique user name'
     )
     email = models.EmailField(
         unique=True,
-        verbose_name='Имеил пользователя'
+        verbose_name='Email of user'
     )
     role = models.CharField(
         max_length=20,
         choices=USER_ROLES,
         blank=True,
         default=USER,
-        verbose_name='Роль пользователя'
+        verbose_name='Role of user'
     )
     first_name = models.CharField(
         max_length=150,
         blank=True,
-        verbose_name='Имя'
+        verbose_name='First name'
     )
     last_name = models.CharField(
         max_length=150,
         blank=True,
-        verbose_name='Фамилия'
+        verbose_name='Last name'
     )
     bio = models.TextField(
         blank=True,
-        verbose_name='Биография'
+        verbose_name='Biography'
     )
     confirmation_code = models.CharField(
-        max_length=6,
+        max_length=25,
         null=True
     )
 

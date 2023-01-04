@@ -42,6 +42,7 @@ class TitleSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'rating')
 
     def to_representation(self, instance):
+        """Give a response with all fields of genre and comment."""
         response = super().to_representation(instance)
         response['category'] = CategorySerializer(
             instance.category).data
@@ -62,11 +63,12 @@ class TitleSerializer(serializers.ModelSerializer):
         year = dt.date.today().year
         if value > year:
             raise serializers.ValidationError(
-                'Год не должен быть больше текущего.')
+                'The year should be less than current!')
         return value
 
 
 class RegistrySerializer(serializers.ModelSerializer):
+    """New user registration serialazer."""
     username = serializers.CharField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all()), ]
@@ -83,25 +85,25 @@ class RegistrySerializer(serializers.ModelSerializer):
     def validate_email(self, email):
         if email == '':
             raise serializers.ValidationError(
-                'Не введена почта.'
+                'Email not specified.'
             )
         elif User.objects.filter(email__iexact=email).exists():
             raise serializers.ValidationError(
-                'Такой email уже существует.'
+                'Email already exists.'
             )
         return email
 
     def validate_username(self, username):
         if username.lower() == 'me':
             raise ValidationError(
-                "Использовать имя 'me' в качестве username запрещено.")
+                "Using 'me' name as username is prohibited.")
         elif User.objects.filter(username__iexact=username).exists():
             raise serializers.ValidationError(
-                'Такой username уже существует.'
+                'User with this username already exists.'
             )
         elif re.search(r'^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$', username) is None:
             raise ValidationError(
-                "В имени есть недопустимые символы")
+                "Name contains invalid characters.")
         return username
 
 
@@ -129,7 +131,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.filter(username=username).exists()
         if user:
             raise serializers.ValidationError(
-                "Пользователь с данным именем уже существует."
+                "User with this username already exists."
             )
         return username
 
@@ -150,13 +152,13 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs['score'] < 1 or attrs['score'] > 10:
-            raise serializers.ValidationError('Оценка должна быть от 1 до 10!')
+            raise serializers.ValidationError('Grade should be from 1 till 10!')
         if (
                 Review.objects.filter(
                     title__id=self.context['view'].kwargs['title_id'],
                     author=self.context['request'].user).exists()
                 and self.context['request'].method == 'POST'):
-            raise serializers.ValidationError('Отзыв можно только один.')
+            raise serializers.ValidationError('You can write just one review!')
         return super().validate(attrs)
 
 
