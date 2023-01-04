@@ -47,7 +47,7 @@ paths:
     post:
       tags:
         - AUTH
-      operationId: New user registratuon.
+      operationId: New user registration.
       description: |
         To receive a confirmation code to the given 'email'.
 
